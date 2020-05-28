@@ -1,5 +1,7 @@
-import argparse, os
+import argparse
+import os
 import sys
+
 sys.path.append(os.path.abspath(os.path.join(__file__, '..', '..')))
 
 import cvbase as cvb
@@ -87,12 +89,11 @@ def extract_flow(args):
     flow_start_no = min([int(x[:5]) for x in flow_list])
 
     zero_flow = cvb.read_flow(os.path.join(output_file, flow_list[0]))
-    cvb.write_flow(zero_flow*0, os.path.join(output_file, '%05d.rflo' % flow_start_no))
+    cvb.write_flow(zero_flow * 0, os.path.join(output_file, '%05d.rflo' % flow_start_no))
     args.DATA_ROOT = output_file
 
 
 def flow_completion(args):
-
     data_list_dir = os.path.join(args.dataset_root, 'data')
     if not os.path.exists(data_list_dir):
         os.makedirs(data_list_dir)
@@ -148,7 +149,6 @@ def flow_completion(args):
 
 
 def flow_guided_propagation(args):
-
     deepfill_model = DeepFillv1(pretrained_model=args.pretrained_model_inpaint,
                                 image_shape=args.img_shape)
 

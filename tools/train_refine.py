@@ -1,4 +1,5 @@
 import sys, os
+
 sys.path.append(os.path.abspath(os.path.join(__file__, '..', '..')))
 import argparse
 import yaml
@@ -21,7 +22,6 @@ from dataset.FlowRefine import FlowSeq
 from models import resnet_models
 from utils.io import save_ckpt, load_ckpt
 from utils.runner_func import *
-
 
 parser = argparse.ArgumentParser()
 
@@ -76,13 +76,12 @@ args = parser.parse_args()
 
 
 def main():
-
     image_size = [args.IMAGE_SHAPE[0], args.IMAGE_SHAPE[1]]
 
     if args.model_name is not None:
-        model_save_dir = './snapshots/'+args.model_name+'/ckpt/'
-        sample_dir = './snapshots/'+args.model_name+'/images/'
-        log_dir = './logs/'+args.model_name
+        model_save_dir = './snapshots/' + args.model_name + '/ckpt/'
+        sample_dir = './snapshots/' + args.model_name + '/images/'
+        log_dir = './logs/' + args.model_name
     else:
         model_save_dir = os.path.join(args.save_dir, 'ckpt')
         sample_dir = os.path.join(args.save_dir, 'images')
@@ -171,9 +170,9 @@ def main():
         # fake_flow_f = f_res * mask[:,10:12,:,:] + flow_masked[:,10:12,:,:] * (1. - mask[:,10:12,:,:])
         # fake_flow_r = r_res * mask[:,32:34,:,:] + flow_masked[:,32:34,:,:] * (1. - mask[:,32:34,:,:])
 
-        loss['1x_recon'] = L.L1_mask(f_res, gt_flow[:,:2,:,:], mask[:,10:12,:,:])
+        loss['1x_recon'] = L.L1_mask(f_res, gt_flow[:, :2, :, :], mask[:, 10:12, :, :])
         loss['1x_recon'] += L.L1_mask(r_res, gt_flow[:, 2:, ...], mask[:, 32:34, ...])
-        loss['f_recon_hard'], new_mask = L.L1_mask_hard_mining(f_res, gt_flow[:, :2,:,:], mask[:,10:11,:,:])
+        loss['f_recon_hard'], new_mask = L.L1_mask_hard_mining(f_res, gt_flow[:, :2, :, :], mask[:, 10:11, :, :])
         loss['r_recon_hard'], new_mask = L.L1_mask_hard_mining(r_res, gt_flow[:, 2:, ...], mask[:, 32:33, ...])
 
         loss_total = loss['1x_recon'] + args.LAMBDA_HARD * (loss['f_recon_hard'] + loss['r_recon_hard'])
@@ -193,7 +192,7 @@ def main():
             print_loss_dict(loss)
             write_loss_dict(loss, writer, i)
 
-        if (i+1) % args.MODEL_SAVE_STEP == 0:
+        if (i + 1) % args.MODEL_SAVE_STEP == 0:
             save_ckpt(os.path.join(model_save_dir, 'DFI_%d.pth' % i),
                       [('model', flow_resnet)], [('optimizer', optimizer)], i)
             print('Model has been saved at %d Iters' % i)

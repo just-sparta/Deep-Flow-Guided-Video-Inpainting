@@ -1,17 +1,15 @@
-import argparse, os
+import argparse
+import os
 import sys
+
 sys.path.append(os.path.abspath(os.path.join(__file__, '..', '..')))
 
 import torch
 import torch.nn as nn
-import cv2
-import numpy as np
 import cvbase as cvb
-import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from mmcv import ProgressBar
 
-import utils.image as im
 from models import resnet_models
 from dataset import FlowInitial, FlowRefine
 from utils.io import load_ckpt
@@ -117,7 +115,6 @@ def test_initial_stage(args):
             cvb.write_flow(res_save, output_file)
             task_bar.update()
     sys.stdout.write('\n')
-    dfc_resnet = None
     torch.cuda.empty_cache()
     print('Initial Results Saved in', args.output_root)
 
@@ -161,8 +158,10 @@ def test_refine_stage(args):
             res_flow_f = res_flow[:, :2, :, :]
             res_flow_r = res_flow[:, 2:, :, :]
 
-            res_complete_f = res_flow_f * mask[:, 10:11, :, :] + flow_masked[:, 10:12, :, :] * (1. - mask[:, 10:11, :, :])
-            res_complete_r = res_flow_r * mask[:,32:34,:,:] + flow_masked[:,32:34,:,:] * (1. - mask[:,32:34,:,:])
+            res_complete_f = res_flow_f * mask[:, 10:11, :, :] + flow_masked[:, 10:12, :, :] * (
+                        1. - mask[:, 10:11, :, :])
+            res_complete_r = res_flow_r * mask[:, 32:34, :, :] + flow_masked[:, 32:34, :, :] * (
+                        1. - mask[:, 32:34, :, :])
 
             output_dir_split = output_dir.split(',')
 
@@ -178,7 +177,6 @@ def test_refine_stage(args):
             cvb.write_flow(res_save_r, output_file_r)
             task_bar.update()
     sys.stdout.write('\n')
-    dfc_resnet = None
     torch.cuda.empty_cache()
     print('Refined Results Saved in', args.output_root)
 

@@ -1,19 +1,14 @@
 import sys, os
+
 sys.path.append(os.path.abspath(os.path.join(__file__, '..', '..')))
 import argparse
 import yaml
 
-
 import torch
-import cvbase as cvb
-import numpy as np
-import cv2
+
 import torch.optim as optim
 from torch import nn
-import torch.nn.functional as F
 from tensorboardX import SummaryWriter
-from torch.utils import data
-from torchvision.utils import save_image, make_grid
 from tqdm import tqdm
 from torch.utils.data import DataLoader
 
@@ -22,7 +17,6 @@ from dataset.FlowInitial import FlowSeq
 from models import resnet_models
 from utils.io import save_ckpt, load_ckpt
 from utils.runner_func import *
-
 
 parser = argparse.ArgumentParser()
 
@@ -76,13 +70,12 @@ args = parser.parse_args()
 
 
 def main():
-
     image_size = [args.IMAGE_SHAPE[0], args.IMAGE_SHAPE[1]]
 
     if args.model_name is not None:
-        model_save_dir = './snapshots/'+args.model_name+'/ckpt/'
-        sample_dir = './snapshots/'+args.model_name+'/images/'
-        log_dir = './logs/'+args.model_name
+        model_save_dir = './snapshots/' + args.model_name + '/ckpt/'
+        sample_dir = './snapshots/' + args.model_name + '/images/'
+        log_dir = './logs/' + args.model_name
     else:
         model_save_dir = os.path.join(args.save_dir, 'ckpt')
         sample_dir = os.path.join(args.save_dir, 'images')
@@ -167,9 +160,9 @@ def main():
 
         flow1x = flow_resnet(input_x)
 
-        fake_flow = flow1x * mask[:,10:12,:,:] + flow_masked[:,10:12,:,:] * (1. - mask[:,10:12,:,:])
-        loss['1x_recon'] = L.L1_mask(flow1x[:,:,:,:], gt_flow[:,10:12,:,:], mask[:,10:12,:,:])
-        loss['1x_recon_hard'], new_mask = L.L1_mask_hard_mining(flow1x, gt_flow[:,10:12,:,:], mask[:,10:11,:,:])
+        fake_flow = flow1x * mask[:, 10:12, :, :] + flow_masked[:, 10:12, :, :] * (1. - mask[:, 10:12, :, :])
+        loss['1x_recon'] = L.L1_mask(flow1x[:, :, :, :], gt_flow[:, 10:12, :, :], mask[:, 10:12, :, :])
+        loss['1x_recon_hard'], new_mask = L.L1_mask_hard_mining(flow1x, gt_flow[:, 10:12, :, :], mask[:, 10:11, :, :])
 
         loss_total = loss['1x_recon'] + args.LAMBDA_HARD * loss['1x_recon_hard']
 
@@ -188,7 +181,7 @@ def main():
             print_loss_dict(loss)
             write_loss_dict(loss, writer, i)
 
-        if (i+1) % args.MODEL_SAVE_STEP == 0:
+        if (i + 1) % args.MODEL_SAVE_STEP == 0:
             save_ckpt(os.path.join(model_save_dir, 'DFI_%d.pth' % i),
                       [('model', flow_resnet)], [('optimizer', optimizer)], i)
             print('Model has been saved at %d Iters' % i)
